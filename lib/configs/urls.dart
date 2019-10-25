@@ -7,13 +7,13 @@ const Map<String, String> requestUrls = {
   'home_recommand_playlist': '/top/playlist?limit=6&order=new',
   'home_recommand_mv': '/mv/all',
   'login': '/login',
+  'mymusic_quantity': '/user/subcount',
 };
 
 String getServiceUrl(String key) {
-  if(requestUrls.containsKey(key)) {
+  if (requestUrls.containsKey(key)) {
     return HOST + requestUrls[key];
-  }
-  else {
+  } else {
     throw Exception('找不到相关接口地址:$key');
   }
 }

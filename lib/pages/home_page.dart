@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyrefresh/material_footer.dart';
-import 'package:flutter_easyrefresh/material_header.dart';
+// import 'package:flutter_easyrefresh/material_footer.dart';
+// import 'package:flutter_easyrefresh/material_header.dart';
+import 'package:flutter_easyrefresh/taurus_footer.dart';
+import 'package:flutter_easyrefresh/taurus_header.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:provider/provider.dart';
@@ -18,13 +20,19 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  int currentMVPage = 0;
+  int currentMVOffset = 4;
   List<MVData> mvItemList = [];
 
   @override
   void initState() {
     print('-----------------初始化home_page');
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    print('----------------销毁home_page');
+    super.dispose();
   }
 
   @override
@@ -50,13 +58,18 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
               mvItemList.addAll(_recommandMVData.mvDataList);
             }
             return EasyRefresh(
-              header: MaterialHeader(),
-              footer: MaterialFooter(),
+              header: TaurusHeader(),
+              footer: TaurusFooter(),
               onLoad: () async {
-                getRequestData(getServiceUrl('home_recommand_mv'), formData: {'limit': 3, 'offset': currentMVPage}).then((val) {
-                  RecommandMV _recommandMVData = RecommandMV.fromJson(_homepageData['home_recommand_mv']);
+                getRequestData(getServiceUrl('home_recommand_mv'), formData: {'limit': 3, 'offset': currentMVOffset}).then((val) {
+                  RecommandMV _recommandMVData = RecommandMV.fromJson(val);
                   setState(() {
+                    print(_recommandMVData.mvDataList.length);
+                    print(_recommandMVData.mvDataList[0].toJson());
+                    print(_recommandMVData.mvDataList[1].toJson());
+                    print(_recommandMVData.mvDataList[2].toJson());
                     mvItemList.addAll(_recommandMVData.mvDataList);
+                    this.currentMVOffset += 3;
                   });
                 });
               },
@@ -70,7 +83,7 @@ class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin 
                     playList: _recommandPlaylistData,
                   ),
                   RecommandMVGroup(
-                    MVDataList: mvItemList,
+                    mvDataList: mvItemList,
                   )
                 ],
               ),
@@ -251,28 +264,43 @@ class RecommandPlayListGroup extends StatelessWidget {
 }
 
 class RecommandMVGroup extends StatelessWidget {
-  final List<MVData> MVDataList;
+  final List<MVData> mvDataList;
 
-  const RecommandMVGroup({Key key, this.MVDataList}) : super(key: key);
+  const RecommandMVGroup({Key key, this.mvDataList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(top: 10.0),
-      color: Colors.white,
+      color: Colors.black12,
       child: Column(
         children: <Widget>[
           _getTitleBanner(),
-          _getMVList(),
+          Column(
+            children: _getMVList(),
+          )
         ],
       ),
     );
   }
 
+  List<Widget> _getMVList() {
+    if (mvDataList.length <= 0) {
+      return [Text('加载中')];
+    } else {
+      List<Widget> mvList = mvDataList.map((mvData) {
+        return _getMVTile(
+            mvData.cover, mvData.name, mvData.playCount, mvData.briefDesc == null ? '最新推荐' : mvData.briefDesc, mvData.artistName);
+      }).toList();
+      return mvList;
+    }
+  }
+
   Widget _getTitleBanner() {
     return Container(
-      margin: EdgeInsets.all(10),
-      height: ScreenUtil().setHeight(55),
+      color: Colors.white,
+      padding: EdgeInsets.fromLTRB(15, 5, 0, 5),
+      height: ScreenUtil().setHeight(75),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -285,38 +313,78 @@ class RecommandMVGroup extends StatelessWidget {
     );
   }
 
-  Widget _getMVList() {
-    return Container(
-      height: ScreenUtil().setHeight(500),
-      // child: ListView.builder(
-      //   itemCount: recommandMVData.mvList.length,
-      //   itemBuilder: (context, index) {
-      //     MVData _tmp = recommandMVData.mvList[index];
-      //     return _getMVTile(_tmp.cover, _tmp.name, _tmp.playCount, _tmp.briefDesc);
-      //   },
-      // ),
-    );
-  }
+  Widget _getMVTile(String cover, String name, int playCount, String briefDesc, String artistName) {
+    Widget _getTileTitle() {
+      return Container(
+        padding: EdgeInsets.only(top: 5, bottom: 15),
+        child: Text(
+          briefDesc,
+          style: TextStyle(
+            color: Colors.black54,
+            fontSize: ScreenUtil().setSp(35),
+          ),
+        ),
+      );
+    }
 
-  Widget _getMVTile(String cover, String name, int playCount, String briefDesc) {
+    Widget _getTileName() {
+      return Container(
+          color: Color.fromARGB(255, 247, 248, 249),
+          padding: EdgeInsets.fromLTRB(5, 15, 5, 15),
+          child: Row(
+            children: <Widget>[
+              Text(
+                name,
+                style: TextStyle(
+                  fontSize: ScreenUtil().setSp(35),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ));
+    }
+
+    Widget _getTileFooter() {
+      var more_horiz = Icons.more_horiz;
+      return Container(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(Icons.play_arrow),
+                Text(playCount.toString()),
+              ],
+            ),
+            IconButton(
+              icon: Icon(Icons.more_vert),
+              onPressed: () {},
+            )
+          ],
+        ),
+      );
+    }
+
     return Container(
+      padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+      color: Colors.white,
+      width: ScreenUtil().setWidth(750),
+      margin: EdgeInsets.only(bottom: 4),
       child: Column(
         children: <Widget>[
           Container(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                _getTileTitle(),
                 Image.network(
                   cover,
-                  height: ScreenUtil().setHeight(100),
                   fit: BoxFit.contain,
                 ),
-                Text(name),
-                Text(briefDesc)
+                _getTileName(),
+                _getTileFooter(),
               ],
             ),
-          ),
-          Container(
-            child: Text('已播放$playCount'),
           ),
         ],
       ),

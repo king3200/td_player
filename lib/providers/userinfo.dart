@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user.dart';
 
-
 class UserInfoNotifier extends ChangeNotifier {
   User user;
 
@@ -16,6 +15,6 @@ class UserInfoNotifier extends ChangeNotifier {
   }
 
   bool isLogin() {
-    return user==null;
+    return user == null;
   }
 }
