@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:td_player/models/user.dart';
 import 'package:td_player/providers/userinfo.dart';
 import '../providers/userinfo.dart';
+import '../service/url_request.dart';
 
 class MyMusicPage extends StatefulWidget {
   @override
@@ -15,7 +16,7 @@ class _MyMusicPageState extends State<MyMusicPage> with AutomaticKeepAliveClient
   @override
   bool get wantKeepAlive => true;
 
-  Timer timer;
+  Timer _timer;
 
   @override
   void initState() {
@@ -25,7 +26,7 @@ class _MyMusicPageState extends State<MyMusicPage> with AutomaticKeepAliveClient
 
   @override
   void dispose() {
-    if (timer != null) timer.cancel();
+    if (_timer != null) _timer.cancel();
     print('------------------mymusic_page dispose');
     super.dispose();
   }
@@ -35,8 +36,7 @@ class _MyMusicPageState extends State<MyMusicPage> with AutomaticKeepAliveClient
     // 检查是否登陆
     User user = Provider.of<UserInfoNotifier>(context).user;
     if (user == null) {
-      // Navigator.of(context).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
-      timer = Timer(Duration(milliseconds: 1000), () {
+      _timer = Timer(Duration(milliseconds: 1000), () {
         try {
           Navigator.of(context).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
         } catch (e) {
@@ -58,7 +58,16 @@ class _MyMusicPageState extends State<MyMusicPage> with AutomaticKeepAliveClient
           ),
           title: Text('我的音乐'),
         ),
-        body: Text(Provider.of<UserInfoNotifier>(context).user.account.toString()),
+        body: FutureBuilder(
+          future: getMyMusicData(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return Text(snapshot.data);
+            } else {
+              return Text('111');
+            }
+          },
+        ),
       );
     }
   }

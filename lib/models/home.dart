@@ -5,8 +5,7 @@ class RecommandPlayList {
   bool more;
   String cat;
 
-  RecommandPlayList(
-      {this.playlists, this.total, this.code, this.more, this.cat});
+  RecommandPlayList({this.playlists, this.total, this.code, this.more, this.cat});
 
   RecommandPlayList.fromJson(Map<String, dynamic> json) {
     if (json['playlists'] != null) {
@@ -123,8 +122,7 @@ class Playlist {
     trackUpdateTime = json['trackUpdateTime'];
     specialType = json['specialType'];
     totalDuration = json['totalDuration'];
-    creator =
-        json['creator'] != null ? new Creator.fromJson(json['creator']) : null;
+    creator = json['creator'] != null ? new Creator.fromJson(json['creator']) : null;
     tracks = json['tracks'];
     if (json['subscribers'] != null) {
       subscribers = new List<Subscribers>();
@@ -270,9 +268,8 @@ class Creator {
     backgroundUrl = json['backgroundUrl'];
     authority = json['authority'];
     mutual = json['mutual'];
-    expertTags = json['expertTags'] != null ?  json['expertTags'].cast<String>(): null;
-    experts =
-        json['experts'] != null ? new Experts.fromJson(json['experts']) : null;
+    expertTags = json['expertTags'] != null ? json['expertTags'].cast<String>() : null;
+    experts = json['experts'] != null ? new Experts.fromJson(json['experts']) : null;
     djStatus = json['djStatus'];
     vipType = json['vipType'];
     remarkName = json['remarkName'];
@@ -705,7 +702,7 @@ class Artists {
   Artists.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
-    alias = json['alias'].cast<String>();
+    alias = json['alias'] != null ? json['alias'].cast<String>() : List<String>();
     transNames = json['transNames'] != null ? json['transNames'].cast<String>() : [];
   }
 
